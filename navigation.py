@@ -1,34 +1,52 @@
 import numpy as np
 
-def least_squares(residuals, taylor_transform):
-    taylor_transform = np.matrix(taylor_transform)
-    residuals = np.matrix(residuals)
 
-    transpose = taylor_transform.transpose()
-    square = taylor_transform * transpose
+class LeastSquares:
+    def __init__(self, stations, residuals, initial_guess=(830, 420)):
+        self.stations = [[610, 1040], [220, 720], [140, 150]]
+        self.x0 = initial_guess[0]
+        self.y0 = initial_guess[1]
 
-    try:
-        inverse = np.linalg.inv(square)
-    except np.linalg.LinAlgError as e:
-        inverse = None
+    @property
+    def transformation_matrix(self):
+        _transform = []
+        for station in self.stations:
+            r0 = ((self.x0 - station[0])**2 + (self.y0 - station[1])**2)**0.5
+            row = [(self.x0 - station[0])/r0, (self.y0 - station[1])/r0]
+            _transform.append(row)
+        return np.matrix(_transform)
 
-    try:
-        movement = inverse * transpose * np.matrix(residuals)
-    except ValueError as e:
-        print(e)
-    except TypeError as e:
-        print(e)
-    else:
-        return movement
+    def least_squares(self, residuals, weighting):
+        """ Calculate (dx, dy) in A(dx, dy) = b,
+            where b is the vector of residuals,
+            and A is the transformation matrix, using the
+            least squares method
+
+            x = (A^T W A)^-1 A^T W b, where W is the error weighting
+            """
+        transform = self.transformation_matrix
+        residuals = np.matrix(residuals).transpose()
+        weighting = np.matrix(weighting)
+
+        # Make sure vectors are column vectors
+        assert residuals.shape[1] == 1
+
+        square = transform.transpose()*weighting*transform
+        covar = np.linalg.inv(square)
+
+        movement = covar * transform.transpose() * weighting * residuals
+
+        return movement, covar
 
 
-def calculate_position(coords: list, ranges: list):
-    """ Returns a vessels position based on station location and range measurements """
-    assert len(coords) == len(ranges)
-    return coords
+class Vessel:
+    def position(coords: list, ranges: list):
+        """ Returns a vessels position based on station
+        location and range measurements """
+        assert len(coords) == len(ranges)
+        return coords
+
 
 
 if __name__ == '__main__':
     print("running...")
-
-
