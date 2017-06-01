@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 
 
 class NoSolutionError(Exception):
@@ -7,7 +8,8 @@ class NoSolutionError(Exception):
     """
 
 
-def distance(reference_points, point):
+def distance(reference_points: List[List[float]],
+             point: List[float]):
     """
     Calculates the distances to the measured point, from the
     various signal towers.
@@ -20,7 +22,8 @@ def distance(reference_points, point):
     return r0
 
 
-def transformation_matrix(reference_points, point):
+def transformation_matrix(reference_points: List[List[float]],
+                          point: List[float]):
     """
     This produces the linear transformation matrix corresponding
     to the range equation of the vessel from the signal towers
@@ -36,7 +39,9 @@ def transformation_matrix(reference_points, point):
     return np.matrix(_transform)
 
 
-def least_squares(transformation_matrix, residuals, weighting):
+def least_squares(transformation_matrix: np.ndarray,
+                  residuals: List[float],
+                  weighting: List[List[float]]):
     """
     Calculate (dx, dy) in A(dx, dy) = b,
     where b is the vector of residuals,

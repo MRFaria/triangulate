@@ -1,5 +1,6 @@
 import least_squares as ls
 import numpy as np
+from typing import List
 
 
 class VesselNavigator2D:
@@ -10,11 +11,10 @@ class VesselNavigator2D:
 
     _max_iterations = 7
 
-    def __init__(self, guess_pos, stations, variance, ranges):
-        """
-        args:
-        [float, float], [[float, float], ...], float, [[float, float], ...]
-        """
+    def __init__(self, guess_pos: List[float],
+                 stations: List[List[float]],
+                 variance: int,
+                 ranges: List[float]):
         self.guess_pos = guess_pos
         self.stations = stations
         self.variance = variance
@@ -45,7 +45,9 @@ class VesselNavigator2D:
             print('No solution, old_pos : pos = ', old_pos, ':', pos)
             raise ls.NoSolutionError
 
-    def _correct_position(self, pos, transformation_matrix):
+    def _correct_position(self,
+                          pos: List[float],
+                          transformation_matrix: np.ndarray):
         """
         Correct initial unprecise position vector by triangulating distances
         to signal towers.
