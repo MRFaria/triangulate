@@ -1,29 +1,61 @@
 import unittest
-import least_squares
+import least_squares as ls
+import numpy as np
+import navigation as na
 
 
-class TestVesselNavigation(unittest.TestCase):
+class TestVesselNavigator(unittest.TestCase):
     stations = [[610, 1040], [220, 720], [140, 150]]
-    initial_pos = [830, 420]
+    guess_pos = np.array([830, 420])
 
-#    def test_calculate_position(self):
-#        coords = [[610, 1049], [220, 720], [140, 150]]
-#        assert navigation.position(coords, [660, 680, 740]) == [830, 418]
+    var = 1/(2.5*2.5)
+    ranges = np.array([660, 680, 740])
+    vessel = na.VesselNavigator2D(guess_pos, stations, var, ranges)
+
+    def test_get_position(self):
+        pos, sd = self.vessel.get_position()
+        correct_pos = [829.57, 417.86]
+        correct_sd = [1.94, 2.34]
+
+        np.testing.assert_almost_equal(pos, correct_pos, 2)
+        np.testing.assert_almost_equal(sd, correct_sd, 2)
+
+
+class TestLeastSquares(unittest.TestCase):
+    stations = [[610, 1040], [220, 720], [140, 150]]
+    guess_pos = np.array([830, 420])
 
     def test_transform_matrix(self):
-        r0 = ((self.initial_pos[0] - self.stations[0][0])**2 +
-              (self.initial_pos[1] - self.stations[0][1])**2)**0.5
+        r0 = ((self.guess_pos[0] - self.stations[0][0])**2 +
+              (self.guess_pos[1] - self.stations[0][1])**2)**0.5
 
-        T1 = (self.initial_pos[0] - self.stations[0][0]) / r0
+        T1 = (self.guess_pos[0] - self.stations[0][0]) / r0
 
-        transformation_matrix = least_squares.transformation_matrix(
-            self.stations, self.initial_pos)
+        transformation_matrix = ls.transformation_matrix(
+            self.stations, self.guess_pos)
         self.assertAlmostEqual(transformation_matrix[0, 0], T1)
 
     def test_least_squares(self):
-        transformation_matrix = least_squares.transformation_matrix(
-            self.stations, self.initial_pos)
-        a = least_squares.least_squares(
-            transformation_matrix, [200, 200, 200],
-            [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        print(a)
+        pos = self.guess_pos
+        movement = np.zeros(2)
+
+        r0 = ls.distance(self.stations, pos)
+
+        transformation_matrix = ls.transformation_matrix(
+            self.stations, pos)
+        residuals = np.array([660, 680, 740]) - r0
+
+        var = 1/(2.5*2.5)
+        movement, covar = ls.least_squares(transformation_matrix,
+                                           residuals,
+                                           [[var, 0, 0],
+                                            [0, var, 0],
+                                            [0, 0, var]])
+        pos = pos + movement
+
+        # From problem sheet
+        correct_pos = [829.57, 417.86]
+        correct_sd = [1.94, 2.34]
+
+        np.testing.assert_almost_equal(pos, correct_pos, 2)
+        np.testing.assert_almost_equal(np.diag(covar) ** 0.5, correct_sd, 2)
