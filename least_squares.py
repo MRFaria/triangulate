@@ -7,30 +7,30 @@ class NoSolutionError(Exception):
     """
 
 
-def distance(stations, pos):
+def distance(reference_points, point):
     """
     Calculates the distances to the measured point, from the
     various signal towers.
     """
 
-    r0 = np.zeros(len(stations))
-    for i, _ in enumerate(stations):
-        r0[i] = ((pos[0] - stations[i][0])**2 +
-                 (pos[1] - stations[i][1])**2)**0.5
+    r0 = np.zeros(len(reference_points))
+    for i, _ in enumerate(reference_points):
+        r0[i] = ((point[0] - reference_points[i][0])**2 +
+                 (point[1] - reference_points[i][1])**2)**0.5
     return r0
 
 
-def transformation_matrix(stations, pos):
+def transformation_matrix(reference_points, point):
     """
     This produces the linear transformation matrix corresponding
     to the range equation of the vessel from the signal towers
     """
 
     _transform = []
-    r0 = distance(stations, pos)
+    r0 = distance(reference_points, point)
 
-    for i, station in enumerate(stations):
-        row = [(pos[0] - station[0])/r0[i], (pos[1] - station[1])/r0[i]]
+    for i, station in enumerate(reference_points):
+        row = [(point[0] - station[0])/r0[i], (point[1] - station[1])/r0[i]]
         _transform.append(row)
 
     return np.matrix(_transform)
@@ -47,11 +47,12 @@ def least_squares(transformation_matrix, residuals, weighting):
     """
 
     transform = transformation_matrix
-    residuals = np.matrix(residuals).transpose()
+    residuals = np.matrix(residuals)
+    if residuals.shape[1] != 1:
+        residuals = np.matrix(residuals).transpose()
     weighting = np.matrix(weighting)
 
     # Make sure vectors are column vectors
-    assert residuals.shape[1] == 1
 
     square = transform.transpose()*weighting*transform
 

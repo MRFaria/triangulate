@@ -11,11 +11,19 @@ class VesselNavigator2D:
     _max_iterations = 7
 
     def __init__(self, guess_pos, stations, variance, ranges):
+        """
+        args:
+        [float, float], [[float, float], ...], float, [[float, float], ...]
+        """
         self.guess_pos = guess_pos
         self.stations = stations
         self.variance = variance
         self.ranges = ranges
         self.var_matrix = np.identity(len(stations)) * variance
+
+        if len(ranges) != len(stations):
+            print('ERROR - Need a range value for every measurement station')
+            raise ValueError
 
     def get_position(self):
         """
@@ -58,4 +66,10 @@ class VesselNavigator2D:
 
 
 if __name__ == '__main__':
-    print("running...")
+    stations = [[610, 1040], [220, 720], [140, 150]]
+    guess_pos = np.array([830, 420])
+    var = 1/(2.5*2.5)
+    ranges = np.array([660, 680, 740])
+
+    vessel = VesselNavigator2D(guess_pos, stations, var, ranges)
+    print(vessel.get_position())
