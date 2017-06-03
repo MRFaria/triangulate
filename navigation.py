@@ -37,10 +37,10 @@ class VesselNavigator2D:
                 self.stations, pos)
 
             old_pos = pos
-            pos, sd = self._correct_position(pos, transformation_matrix)
+            pos, sd, rms = self._correct_position(pos, transformation_matrix)
 
             if all(np.isclose(pos, old_pos, atol=0.001)):
-                return pos, sd
+                return pos, sd, rms
         else:
             print('No solution, old_pos : pos = ', old_pos, ':', pos)
             raise ls.NoSolutionError
@@ -56,19 +56,17 @@ class VesselNavigator2D:
 
         r0 = ls.distance(self.stations, pos)
         residuals = self.ranges - r0
-        try:
-            movement, covar = ls.least_squares(transformation_matrix,
-                                               residuals,
-                                               self.var_matrix)
-            sd = np.diag(covar) ** 0.5
-        except np.linalg.LinAlgError:
-            return pos, sd
+        movement, covar = ls.least_squares(transformation_matrix,
+                                           residuals,
+                                           self.var_matrix)
+        sd = np.diag(covar) ** 0.5
+        rms = ls.rms(residuals)
 
-        return pos + movement, sd
+        return pos + movement, sd, rms
 
 
 if __name__ == '__main__':
-    stations = [[610, 1040], [220, 720], [140, 150]]
+    stations = np.matrix([[610, 1040], [220, 720], [140, 150]])
     guess_pos = np.array([830, 420])
     var = 1/(2.5*2.5)
     ranges = np.array([660, 680, 740])

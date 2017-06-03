@@ -13,7 +13,7 @@ class TestVesselNavigator(unittest.TestCase):
     vessel = na.VesselNavigator2D(guess_pos, stations, var, ranges)
 
     def test_get_position(self):
-        pos, sd = self.vessel.get_position()
+        pos, sd, rms = self.vessel.get_position()
         correct_pos = [829.57, 417.86]
         correct_sd = [1.94, 2.34]
 
