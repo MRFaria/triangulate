@@ -59,3 +59,9 @@ class TestLeastSquares(unittest.TestCase):
 
         np.testing.assert_almost_equal(pos, correct_pos, 2)
         np.testing.assert_almost_equal(np.diag(covar) ** 0.5, correct_sd, 2)
+
+    def test_rms(self):
+        r0 = ls.distance(self.stations, self.guess_pos)
+        residuals = np.array([660, 680, 740]) - r0
+        rms = ls.rms(residuals)
+        self.assertAlmostEqual(0.46663792535237764, rms)

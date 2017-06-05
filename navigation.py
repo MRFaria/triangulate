@@ -43,7 +43,7 @@ class VesselNavigator2D:
                 return pos, sd, rms
         else:
             print('No solution, old_pos : pos = ', old_pos, ':', pos)
-            raise ls.NoSolutionError
+            return None
 
     def _correct_position(self,
                           pos: List[float],

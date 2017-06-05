@@ -2,13 +2,7 @@ import numpy as np
 from typing import List
 
 
-class NoSolutionError(Exception):
-    """
-    Least squares output does not converge to a solution
-    """
-
-
-class SingularMatrixError(NoSolutionError):
+class SingularMatrixError(Exception):
     """
     Determinent of matrix tends to zero
     """
