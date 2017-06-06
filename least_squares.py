@@ -32,16 +32,16 @@ def transformation_matrix(reference_points: List[List[float]],
     to the range equation of the vessel from the signal towers
     """
 
-    _transform = []
+    transform = []
     r0 = distance(reference_points, point)
     reference_points = np.array(reference_points)
     point = np.array(point)
 
     for i, station in enumerate(reference_points):
         row = [(point[0] - station[0])/r0[i], (point[1] - station[1])/r0[i]]
-        _transform.append(row)
+        transform.append(row)
 
-    return np.matrix(_transform)
+    return np.matrix(transform)
 
 
 def least_squares(transformation_matrix: np.ndarray,
@@ -63,8 +63,7 @@ def least_squares(transformation_matrix: np.ndarray,
         residuals = np.matrix(residuals).transpose()
     weighting = np.matrix(weighting)
 
-    # Make sure vectors are column vectors
-
+    # Calculate the square matrix
     square = transform.transpose()*weighting*transform
 
     # Check if matrix is singular

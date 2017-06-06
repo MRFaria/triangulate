@@ -13,7 +13,7 @@ class VesselNavigator2D:
 
     def __init__(self, guess_pos: List[float],
                  stations: List[List[float]],
-                 variance: int,
+                 variance: float,
                  ranges: List[float]):
         self.guess_pos = guess_pos
         self.stations = stations
